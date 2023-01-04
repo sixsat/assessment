@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sixsat/assessment/pkg/expense"
 )
 
 func main() {
@@ -19,9 +20,12 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	expense.InitDB()
+
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "Hi mom.")
 	})
+	e.POST("/expenses", expense.CreateExpense)
 
 	port := os.Getenv("PORT")
 	log.Println("start at port:", port)
