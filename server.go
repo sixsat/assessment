@@ -32,9 +32,6 @@ func main() {
 
 	expense.InitDB()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "Hi mom.")
-	})
 	e.POST("/expenses", expense.CreateExpense)
 	e.GET("/expenses", expense.GetAllExpenses)
 	e.GET("/expenses/:id", expense.GetExpense)
