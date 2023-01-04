@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sixsat/assessment/pkg/config"
 	"github.com/sixsat/assessment/pkg/expense"
 )
 
@@ -30,18 +31,17 @@ func main() {
 		}
 	})
 
-	expense.InitDB()
+	cfg := config.New()
+	expense.InitDB(cfg.DatabaseURL)
 
 	e.POST("/expenses", expense.CreateExpense)
 	e.GET("/expenses", expense.GetAllExpenses)
 	e.GET("/expenses/:id", expense.GetExpense)
 	e.PUT("/expenses/:id", expense.UpdateExpense)
 
-	port := os.Getenv("PORT")
-	log.Println("start at port:", port)
-
+	log.Println("start at port:", cfg.Port)
 	go func() {
-		if err := e.Start(":" + port); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(":" + cfg.Port); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
