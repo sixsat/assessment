@@ -48,3 +48,34 @@ func GetExpense(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, exp)
 }
+
+func UpdateExpense(c echo.Context) error {
+	var exp Expense
+	err := c.Bind(&exp)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+	}
+
+	stmt, err := db.Prepare(`
+		UPDATE expenses
+		SET title = $2, amount = $3, note = $4, tags = $5
+		WHERE id = $1
+		RETURNING id
+		`,
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+
+	id := c.Param("id")
+	row := stmt.QueryRow(id, exp.Title, exp.Amount, exp.Note, pq.Array(exp.Tags))
+	err = row.Scan(&exp.ID)
+	if err == sql.ErrNoRows {
+		return c.JSON(http.StatusNotFound, Err{Message: "expense not found"})
+	}
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, exp)
+}

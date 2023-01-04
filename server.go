@@ -27,6 +27,7 @@ func main() {
 	})
 	e.POST("/expenses", expense.CreateExpense)
 	e.GET("/expenses/:id", expense.GetExpense)
+	e.PUT("/expenses/:id", expense.UpdateExpense)
 
 	port := os.Getenv("PORT")
 	log.Println("start at port:", port)
