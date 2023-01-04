@@ -26,6 +26,7 @@ func main() {
 		return c.JSON(http.StatusOK, "Hi mom.")
 	})
 	e.POST("/expenses", expense.CreateExpense)
+	e.GET("/expenses/:id", expense.GetExpense)
 
 	port := os.Getenv("PORT")
 	log.Println("start at port:", port)
