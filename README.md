@@ -1,3 +1,16 @@
+# How to run
+```bash
+docker compose up
+go run server.go
+```
+
+# How to test
+```bash
+go test --tags=unit -v ./...
+docker compose up
+go clean -testcache && go test --tags=integration -v ./...
+```
+
 # Prerequisites
 * โปรเจคตั้งต้นคือ[โปรเจคนี้](https://github.com/KKGo-Software-engineering/assessment)
 * กำหนดให้ส่งลิ้งค์คำตอบคือ github repository ที่เก็บโค้ดของคุณ `https://github.com/<your github name>/assessment`
