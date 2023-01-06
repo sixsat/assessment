@@ -49,6 +49,30 @@ func GetExpense(c echo.Context) error {
 	return c.JSON(http.StatusOK, exp)
 }
 
+func GetAllExpenses(c echo.Context) error {
+	stmt, err := db.Prepare("SELECT * FROM expenses")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+
+	var exps []Expense
+	for rows.Next() {
+		var exp Expense
+		err = rows.Scan(&exp.ID, &exp.Title, &exp.Amount, &exp.Note, pq.Array(&exp.Tags))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		}
+		exps = append(exps, exp)
+	}
+
+	return c.JSON(http.StatusOK, exps)
+}
+
 func UpdateExpense(c echo.Context) error {
 	var exp Expense
 	err := c.Bind(&exp)
