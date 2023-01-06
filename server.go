@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sixsat/assessment/pkg/config"
 	"github.com/sixsat/assessment/pkg/expense"
 )
 
@@ -20,21 +21,27 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	expense.InitDB()
-
-	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "Hi mom.")
+	// Validate authorization token
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if c.Request().Header.Get("Authorization") != "November 10, 2009" {
+				return c.JSON(http.StatusUnauthorized, "Unauthorized")
+			}
+			return next(c)
+		}
 	})
+
+	cfg := config.New()
+	expense.InitDB(cfg.DatabaseURL)
+
 	e.POST("/expenses", expense.CreateExpense)
 	e.GET("/expenses", expense.GetAllExpenses)
 	e.GET("/expenses/:id", expense.GetExpense)
 	e.PUT("/expenses/:id", expense.UpdateExpense)
 
-	port := os.Getenv("PORT")
-	log.Println("start at port:", port)
-
+	log.Println("start at port:", cfg.Port)
 	go func() {
-		if err := e.Start(":" + port); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(":" + cfg.Port); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
