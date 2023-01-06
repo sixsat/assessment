@@ -82,6 +82,37 @@ func TestITGetExpense(t *testing.T) {
 	}
 }
 
+func TestITUpdateExpense(t *testing.T) {
+	// Arrange
+	eh := setup(t)
+	defer teardown(t, eh)
+
+	body := strings.NewReader(`
+		{"id": 1, "title": "apple smoothie", "amount": 89, "note": "no discount", "tags": ["beverage"]}
+	`)
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("http://localhost:%d/expenses/1", serverPort), body)
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client := http.Client{}
+
+	expected := `{"id":1,"title":"apple smoothie","amount":89,"note":"no discount","tags":["beverage"]}
+`
+
+	// Act
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+
+	byteBody, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	resp.Body.Close()
+
+	// Assertions
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, expected, string(byteBody))
+	}
+}
+
 func setup(t *testing.T) *echo.Echo {
 	InitDB("host=localhost port=5432 user=root password=secret dbname=expense sslmode=disable")
 
