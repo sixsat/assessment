@@ -82,6 +82,34 @@ func TestITGetExpense(t *testing.T) {
 	}
 }
 
+func TestITGetAllExpenses(t *testing.T) {
+	// Arrange
+	eh := setup(t)
+	defer teardown(t, eh)
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(""))
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client := http.Client{}
+
+	expected := `[{"id":1,"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food","beverage"]}]
+`
+
+	// Act
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+
+	byteBody, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	resp.Body.Close()
+
+	// Assertions
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, expected, string(byteBody))
+	}
+}
+
 func TestITUpdateExpense(t *testing.T) {
 	// Arrange
 	eh := setup(t)
